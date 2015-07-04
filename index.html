@@ -1,0 +1,49 @@
+<html>
+
+<head>
+  <title>SCADA</title>
+  <link rel="stylesheet" href="./css/bootstrap.min.css">
+  <script src="./script/angular.min.js"></script>
+   <script src="./script/angular-animate.js"></script>
+
+</head>
+
+<body ng-app="myApp">
+  <div class="container" ng-controller="myCtrl">
+    
+    <input type="checkbox" ng-model="checked" aria-label="Toggle ngShow">
+      Estado Manual
+      <br/>
+      
+      <div>
+        Estado Manual:
+        <div class="check-element animate-hide" ng-show="checked">
+          I show up when your checkbox is checked.
+        </div>
+      </div>
+
+      <div>
+        Estado Automatico:
+        <div class="check-element animate-hide" ng-hide="checked">
+          I hide when your checkbox is checked.
+        </div>
+      </div>
+
+  </div>
+</body>
+
+
+<script>
+var app = angular.module('myApp', ['ngAnimate']);
+
+app.controller('myCtrl',  function($scope, $http) {
+  
+  $http.get("./server/dispositivo.php").success(function (response) {$scope.dispositivos = response;});
+
+  $scope.setDispositivoManual = function($codigo,$estado,$temperatura){
+    $http.get('./server/dispositivo.php?id='+$codigo+'&setEstado='+$estado+'&setTemperatura='+$temperatura);
+  };
+});
+</script>
+
+</html>
