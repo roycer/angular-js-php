@@ -5,45 +5,103 @@
   <link rel="stylesheet" href="./css/bootstrap.min.css">
   <script src="./script/angular.min.js"></script>
    <script src="./script/angular-animate.js"></script>
+   <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
 
 </head>
 
 <body ng-app="myApp">
-  <div class="container" ng-controller="myCtrl">
-    
-    <input type="checkbox" ng-model="checked" aria-label="Toggle ngShow">
-      Estado Manual
-      <br/>
-      
-      <div>
-        Estado Manual:
-        <div class="check-element animate-hide" ng-show="checked">
-          I show up when your checkbox is checked.
-        </div>
+  <div class="container" >
+  <div ng-controller="myCtrl">
+    <div  ng-repeat="dispositivo in dispositivos">
+      <img src="Imagenes/{{dispositivo.DisGetEst}}.gif"  width="107" height="98" alt="Description"/>
+      Nombre = {{dispositivo.DisNom}} <br>
+      <br>
+      Descripcion: 
+      <div class="alert alert-danger">
+        Estado ON/OFF = {{dispositivo.DisGetEst}} <br>
+        Temperatura =  {{dispositivo.DisGetTem/100}} celcius <br>
+        Set = {{dispositivo.DisSetTem/100}} celcius <br>
       </div>
 
-      <div>
-        Estado Automatico:
-        <div class="check-element animate-hide" ng-hide="checked">
-          I hide when your checkbox is checked.
-        </div>
+    </div>
+  </div>
+    <div ng-controller="myCtrlOtro">
+
+      <div class="alert alert-info">
+        <div>
+        <input type="radio" id="estadoAutomatico" name="estado" ng-click="actualizar(1,dispositivo.DisEst)" ng-model="dispositivo.DisEst" ng-required="true" value="0"/>
+        <label for="estadoAutomatico">Automatico</label>
       </div>
+        
+      <div>
+        <input type="radio" id="estadoManual" name="estado" ng-click="actualizar(1,dispositivo.DisEst)" ng-model="dispositivo.DisEst" ng-required="true" value="1" />
+        <label for="estadoManual">Manual</label>
+      </div>
+
+      </div>
+      
+      <div class="alert alert-info">
+      <div ng-hide="dispositivo.DisEst=='0'">
+        
+        <form  role="form" ng-submit="setDispositivoManual(1,dispositivo.DisSetEst,dispositivo.DisSetTem)">
+          <div class="form-group">
+            
+            <label for="Estado">Estado:</label>
+            <input type="text" class="form-control" id="Estado" placeholder="Estado" ng-model="dispositivo.DisSetEst">
+            <label for="Temperatura">Temperatura:</label>
+            <input type="text" class="form-control" id="Temperatura" placeholder="Temperatura" ng-model="dispositivo.DisSetTem">
+          </div>
+          <button type="submit" class="btn btn-default">Enviar</button>
+        </form>
+      </div>
+      </div>
+    </div>
 
   </div>
+
+
+
 </body>
 
+<script>
+
+</script>
 
 <script>
 var app = angular.module('myApp', ['ngAnimate']);
 
-app.controller('myCtrl',  function($scope, $http) {
+app.controller('myCtrl',  function($scope, $http,$interval) {
   
+  $scope.dispositivo = [];
+
+  $http.get("./server/dispositivo.php").success(function (response) {$scope.dispositivos = response;});
+
+
+   $interval(function(){ 
+
+          $http.get("./server/dispositivo.php").success(function (response) {$scope.dispositivos = response;});
+          $scope.apply();
+        },1000)
+});
+
+app.controller('myCtrlOtro',  function($scope, $http,$interval) {
+  
+  $scope.dispositivo = [];
+
   $http.get("./server/dispositivo.php").success(function (response) {$scope.dispositivos = response;});
 
   $scope.setDispositivoManual = function($codigo,$estado,$temperatura){
-    $http.get('./server/dispositivo.php?id='+$codigo+'&setEstado='+$estado+'&setTemperatura='+$temperatura);
+    $http.get('./server/dispositivo.php?id='+$codigo+'&setEstado='+$estado+'&setTemperatura='+($temperatura*100));
   };
+  $scope.actualizar = function($codigo,$estadoMA){
+    
+    $http.get('./server/dispositivo.php?id='+$codigo+'&setMA='+$estadoMA);
+    $http.get("./server/dispositivo.php").success(function (response) {$scope.dispositivos = response;});
+  }
+
 });
+
+
 </script>
 
 </html>
